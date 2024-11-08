@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">CHAI</string>
-    <string name="title_activity_main">CHAI</string>
+    <string name="app_name">Message In A Botlle</string>
+    <string name="title_activity_main">Message In A Botlle</string>
     <string name="package_name">com.example.app</string>
     <string name="custom_url_scheme">com.example.app</string>
 </resources>

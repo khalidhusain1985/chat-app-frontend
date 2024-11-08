@@ -135,7 +135,7 @@ function Sidebar({ onSelectUser, activeUserId, users, currentUserId }) {
     <div>
       {!isSidebarOpen && (
         <button
-          className="lg:hidden fixed top-5 left-36 z-20 text-[#00796B] bg-[#E0F2F1]
+          className="lg:hidden fixed top-12 left-14 z-20 text-[#00796B] bg-[#E0F2F1]
  p-2 rounded-full"
           onClick={toggleSidebar}
         >
@@ -212,7 +212,7 @@ function Sidebar({ onSelectUser, activeUserId, users, currentUserId }) {
                 <div className="w-12 h-12 rounded-full mr-3 bg-gray-300 flex items-center justify-center">
                   {user.avatar ? (
                     <img
-                      src={`https://damp-depths-11309-368a38513de2.herokuapp.com/${user.avatar}`}
+                      src={`https://message-in-a-botlle-b79d5a3a128e.herokuapp.com/${user.avatar}`}
                       alt={user.firstName}
                     />
                   ) : (

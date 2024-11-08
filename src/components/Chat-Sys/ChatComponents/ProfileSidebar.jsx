@@ -71,7 +71,7 @@ const ProfileSidebar = ({
             >
               <Avatar
                 src={
-                  `https://damp-depths-11309-368a38513de2.herokuapp.com/${contact.avatar}` ||
+                  `https://message-in-a-botlle-b79d5a3a128e.herokuapp.com/${contact.avatar}` ||
                   "/api/placeholder/100/100"
                 }
                 alt={contact?.firstName || "Contact"}

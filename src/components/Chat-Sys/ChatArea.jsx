@@ -4,7 +4,7 @@ import ProfileSidebar from "./ChatComponents/ProfileSidebar";
 import AudioCallComponent from "./ChatComponents/AudioCallComponent";
 import VideoComponent from "./ChatComponents/VideoCallComponent";
 import { io } from "socket.io-client";
-import chatbg from "../../assets/chatbg.png";
+import chatbg from "../../assets/chatbg.jpg";
 import logo from "../../assets/logo.jpg";
 
 import {
@@ -18,7 +18,7 @@ import {
   AudioCallIcon,
 } from "./Icons";
 
-const SOCKET_URL = "https://chat-app-demo-9e8a.onrender.com";
+const SOCKET_URL = "https://message-in-a-botlle-b79d5a3a128e.herokuapp.com";
 const ALLOWED_FILE_TYPES = {
   image: ["image/jpeg", "image/png", "image/gif"],
   video: ["video/mp4", "video/webm"],
@@ -378,7 +378,7 @@ function ChatArea({ activeUser }) {
         className="flex-1 flex items-center justify-center bg-cover bg-center"
         style={{ backgroundImage: `url(${chatbg})` }}
       >
-        <p className="text-[#26A69A] font-bold text-[40px] text-center">
+        <p className="text-[#a7e7a7] font-bold text-[40px] text-center">
           Select a contact to start chatting
         </p>
       </div>
@@ -387,198 +387,174 @@ function ChatArea({ activeUser }) {
 
   return (
     <div className="flex-1 flex flex-col bg-white">
-      {/* Header */}
-
-      <div className="bg-white p-4 flex justify-between items-center border-b">
-        <div className="flex items-center">
-          <div className="w-10 h-10 rounded-full mr-3 bg-gray-300 flex items-center justify-center">
-            {/* <span className="text-xl text-gray-600">
-              {activeUser.firstName?.[0]}
-            </span> */}
-            <img
-              src={`https://damp-depths-11309-368a38513de2.herokuapp.com/${activeUser.avatar}`}
-              alt={activeUser.firstName}
-              className="w-full h-full rounded-full object-cover"
+    {/* Header */}
+    <div className="bg-white p-4 flex justify-between items-center border-b">
+      <div className="flex items-center">
+        <div className="w-10 h-10 rounded-full mr-3 bg-gray-300 flex items-center justify-center">
+          <img
+            src={`https://message-in-a-botlle-b79d5a3a128e.herokuapp.com/${activeUser.avatar}`}
+            alt={activeUser.firstName}
+            className="w-full h-full rounded-full object-cover"
+          />
+        </div>
+        <div>
+          <h2 className="font-semibold text-green-600 text-sm sm:text-base">
+            {activeUser.firstName} {activeUser.lastName}
+          </h2>
+          <p className="text-xs sm:text-sm text-gray-500">{activeUser.email}</p>
+        </div>
+      </div>
+      <div className="flex space-x-2 sm:space-x-4">
+        <button
+          className="p-1 sm:p-2 rounded-full bg-gray-100 hover:bg-gray-200"
+          onClick={() => setIsAudioCallOpen(true)}
+        >
+          <AudioCallIcon />
+        </button>
+        <button
+          className="p-1 sm:p-2 rounded-full bg-gray-100 hover:bg-gray-200"
+          onClick={() => setIsVideoCallOpen(true)}
+        >
+          <VideosIcon />
+        </button>
+        <button
+          className="p-1 sm:p-2 rounded-full bg-gray-100 hover:bg-gray-200"
+          onClick={() => setIsSidebarOpen(true)}
+        >
+          <SidebarIcon />
+        </button>
+      </div>
+    </div>
+  
+    {/* Messages Area */}
+    <div
+      className="flex-1 overflow-y-auto p-2 space-y-2 sm:space-y-3"
+      style={{
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }}
+    >
+      {(messagesByContact[activeUser._id] || []).map((msg, index) => (
+        <div
+          key={index}
+          className={`flex ${
+            msg.senderId === userId ? "justify-end" : "justify-start"
+          }`}
+        >
+          <div
+            className={`max-w-[85%] sm:max-w-[70%] lg:max-w-[60%] xl:max-w-[50%] rounded-lg p-2 ${
+              msg.senderId === userId ? "bg-[#26A69A] text-white" : "bg-gray-100"
+            }`}
+          >
+            {renderMessage(msg)}
+            <div className="text-xs text-gray-500 mt-1">
+              {new Date(msg.timestamp).toLocaleTimeString()}
+            </div>
+          </div>
+        </div>
+      ))}
+      <div ref={messagesEndRef} />
+    </div>
+  
+    {/* Input Area with File Upload */}
+    <div className="border-t p-2 sm:p-3">
+      <div className="flex flex-wrap sm:flex-nowrap items-center space-x-1 sm:space-x-2">
+        <button
+          className="p-1 sm:p-2 rounded-full bg-gray-100 hover:bg-gray-200"
+          onClick={() => setShowEmojis(!showEmojis)}
+        >
+          <EmojiIcon />
+        </button>
+        {showEmojis && (
+          <div className="absolute bottom-16 left-0 z-10">
+            <EmojiPicker
+              onEmojiClick={(emojiObject) =>
+                setMessage((prev) => prev + emojiObject.emoji)
+              }
             />
           </div>
-          <div>
-            <h2 className="font-semibold text-green-600">
-              {activeUser.firstName} {activeUser.lastName}
-            </h2>
-            <p className="text-sm text-gray-500">{activeUser.email}</p>
+        )}
+        <input
+          type="file"
+          ref={fileInputRef}
+          onChange={handleFileUpload}
+          className="hidden"
+        />
+        <button
+          onClick={() => fileInputRef.current.click()}
+          className="p-1 sm:p-2 bg-gray-100 rounded-full hover:bg-gray-200"
+        >
+          <AddIcon />
+        </button>
+  
+        {isUploading && (
+          <div className="h-1 w-12 sm:w-16 bg-gray-200 rounded">
+            <div
+              className="h-full bg-[#26A69A] rounded"
+              style={{ width: `${uploadProgress}%` }}
+            />
           </div>
-        </div>
-        <div className="flex space-x-4">
+        )}
+  
+        <input
+          type="text"
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          onKeyPress={(e) => e.key === "Enter" && !e.shiftKey && handleSend()}
+          placeholder="Type a message"
+          className="flex-1 w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg border rounded-full py-1 px-2 sm:py-1.5 sm:px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#26A69A]"
+        />
+  
+        {audioPreview ? (
+          <div className="flex items-center space-x-1">
+            <audio src={audioPreview} controls className="h-8 w-20 sm:w-24" />
+            <button
+              className="p-1 sm:p-2 rounded-full bg-gray-500 hover:bg-[#26A69A] text-white"
+              onClick={handleSend}
+            >
+              <SearchIcon />
+            </button>
+            <button
+              onClick={cancelRecordedAudio}
+              className="p-1 sm:p-2 rounded-full bg-red-500 hover:bg-red-600 text-white"
+            >
+              ✕
+            </button>
+          </div>
+        ) : (
           <button
-            className="p-2 rounded-full bg-gray-100 hover:bg-gray-200"
-            onClick={() => setIsAudioCallOpen(true)}
+            className="p-1 sm:p-2 rounded-full bg-gray-500 hover:bg-[#26A69A] text-white"
+            onClick={handleSend}
           >
-            <AudioCallIcon />
+            <SearchIcon />
           </button>
-          <button
-            className="p-2 rounded-full bg-gray-100 hover:bg-gray-200"
-            onClick={() => setIsVideoCallOpen(true)}
-          >
-            <VideosIcon />
-          </button>
-          <button
-            className="p-2 rounded-full bg-gray-100 hover:bg-gray-200"
-            onClick={() => setIsSidebarOpen(true)}
-          >
-            <SidebarIcon />
-          </button>
-        </div>
-      </div>
-
-      {/* Messages Area */}
-<div
-  className="flex-1 overflow-y-auto p-1 sm:p-2 md:p-4 space-y-2 sm:space-y-3 md:space-y-4"
-  style={{
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-  }}
->
-  {(messagesByContact[activeUser._id] || []).map((msg, index) => (
-    <div
-      key={index}
-      className={`flex ${
-        msg.senderId === userId ? "justify-end" : "justify-start"
-      }`}
-    >
-      <div
-        className={`max-w-[90%] sm:max-w-[70%] md:max-w-sm lg:max-w-md xl:max-w-lg rounded-lg p-2 sm:p-2.5 ${
-          msg.senderId === userId ? "bg-[#26A69A] text-white" : "bg-gray-100"
-        }`}
-      >
-        {renderMessage(msg)}
-        <div className="text-xs text-gray-500 mt-1">
-          {new Date(msg.timestamp).toLocaleTimeString()}
-        </div>
+        )}
       </div>
     </div>
-  ))}
-  <div ref={messagesEndRef} />
-</div>
-
-{/* Input Area with File Upload */}
-<div className="border-t p-2 sm:p-3 md:p-4">
-  <div className="flex items-center flex-wrap sm:flex-nowrap space-x-1 sm:space-x-2">
-    <button
-      className="p-1.5 sm:p-2 rounded-full bg-gray-100 hover:bg-gray-200"
-      onClick={() => setShowEmojis(!showEmojis)}
-    >
-      <EmojiIcon />
-    </button>
-    {showEmojis && (
-      <div className="absolute bottom-16 left-0">
-        <EmojiPicker
-          onEmojiClick={(emojiObject) =>
-            setMessage((prev) => prev + emojiObject.emoji)
-          }
-        />
-      </div>
-    )}
-    <input
-      type="file"
-      ref={fileInputRef}
-      onChange={handleFileUpload}
-      className="hidden"
+  
+    <ProfileSidebar
+      open={isSidebarOpen}
+      onClose={() => setIsSidebarOpen(false)}
+      contact={activeUser}
+      muteModalOpen={muteModalOpen}
+      onMuteClick={() => setMuteModalOpen(true)}
+      onMuteClose={() => setMuteModalOpen(false)}
+      onMute={(duration) => console.log(`Muted for ${duration} minutes`)}
     />
-
-    <button
-      onClick={() => fileInputRef.current.click()}
-      className="p-1.5 sm:p-2 bg-gray-100 rounded-full hover:bg-gray-200"
-    >
-      <AddIcon />
-    </button>
-
-    {isUploading && (
-      <div className="h-1 w-14 sm:w-16 md:w-20 bg-gray-200 rounded">
-        <div
-          className="h-full bg-[#26A69A] rounded"
-          style={{ width: `${uploadProgress}%` }}
-        />
-      </div>
-    )}
-
-    <input
-      type="text"
-      value={message}
-      onChange={(e) => setMessage(e.target.value)}
-      onKeyPress={(e) => e.key === "Enter" && !e.shiftKey && handleSend()}
-      placeholder="Type a message"
-      className="flex-1 border rounded-full py-1 sm:py-1.5 px-3 sm:px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#26A69A]"
+    <AudioCallComponent
+      open={isAudioCallOpen}
+      onClose={() => setIsAudioCallOpen(false)}
+      contact={activeUser}
+      socket={socket}
     />
-
-    <button
-      onClick={isRecording ? stopRecording : startRecording}
-      className={`p-1.5 sm:p-2 rounded-full ${
-        isRecording ? "bg-red-500 animate-pulse" : "bg-gray-100 hover:bg-gray-200"
-      }`}
-    >
-      <RecordIcon />
-    </button>
-
-    {isUploading && (
-      <div className="h-1 w-14 sm:w-16 md:w-20 bg-gray-200 rounded">
-        <div
-          className="h-full bg-[#26A69A] rounded"
-          style={{ width: `${uploadProgress}%` }}
-        />
-      </div>
-    )}
-
-    {audioPreview ? (
-      <div className="flex items-center space-x-1 sm:space-x-2">
-        <audio src={audioPreview} controls className="h-8 w-20 sm:w-28 md:w-32" />
-        <button
-          className="p-1.5 sm:p-2 rounded-full bg-gray-500 hover:bg-[#26A69A] text-white"
-          onClick={handleSend}
-        >
-          <SearchIcon />
-        </button>
-        <button
-          onClick={cancelRecordedAudio}
-          className="p-1.5 sm:p-2 rounded-full bg-red-500 hover:bg-red-600 text-white"
-        >
-          ✕
-        </button>
-      </div>
-    ) : (
-      <button
-        className="p-1.5 sm:p-2 rounded-full bg-gray-500 hover:bg-[#26A69A] text-white"
-        onClick={handleSend}
-      >
-        <SearchIcon />
-      </button>
-    )}
+    <VideoComponent
+      open={isVideoCallOpen}
+      onClose={() => setIsVideoCallOpen(false)}
+      contact={activeUser}
+      socket={socket}
+    />
   </div>
-</div>
-
-
-      <ProfileSidebar
-        open={isSidebarOpen}
-        onClose={() => setIsSidebarOpen(false)}
-        contact={activeUser}
-        muteModalOpen={muteModalOpen}
-        onMuteClick={() => setMuteModalOpen(true)}
-        onMuteClose={() => setMuteModalOpen(false)}
-        onMute={(duration) => console.log(`Muted for ${duration} minutes`)}
-      />
-      <AudioCallComponent
-        open={isAudioCallOpen}
-        onClose={() => setIsAudioCallOpen(false)}
-        contact={activeUser}
-        socket={socket}
-      />
-      <VideoComponent
-        open={isVideoCallOpen}
-        onClose={() => setIsVideoCallOpen(false)}
-        contact={activeUser}
-        socket={socket}
-      />
-    </div>
-  );
+    );
 }
 
 export default ChatArea;

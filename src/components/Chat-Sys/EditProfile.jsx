@@ -73,7 +73,7 @@ const EditProfile = ({ onClose }) => {
       try {
         const token = localStorage.getItem("token");
         const response = await axios.get(
-          "https://damp-depths-11309-368a38513de2.herokuapp.com/api/users/me",
+          "https://message-in-a-botlle-b79d5a3a128e.herokuapp.com/api/users/me",
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -85,7 +85,7 @@ const EditProfile = ({ onClose }) => {
         setPhoneNumber(userData.mobile);
         if (userData.avatar) {
           setAvatarPreview(
-            `https://damp-depths-11309-368a38513de2.herokuapp.com/${userData.avatar}`
+            `https://message-in-a-botlle-b79d5a3a128e.herokuapp.com/${userData.avatar}`
           );
         }
       } catch (error) {
@@ -127,7 +127,7 @@ const EditProfile = ({ onClose }) => {
       }
 
       const response = await axios.put(
-        "https://damp-depths-11309-368a38513de2.herokuapp.com/api/users/me",
+        "https://message-in-a-botlle-b79d5a3a128e.herokuapp.com/api/users/me",
         formData,
         {
           headers: {
@@ -297,7 +297,7 @@ export default EditProfile;
 //     const fetchUserData = async () => {
 //       try {
 //         const token = localStorage.getItem("token");
-//         const response = await axios.get("https://damp-depths-11309-368a38513de2.herokuapp.com/api/users/me", {
+//         const response = await axios.get("https://message-in-a-botlle-b79d5a3a128e.herokuapp.com/api/users/me", {
 //           headers: { Authorization: `Bearer ${token}` },
 //         });
 //         const userData = response.data;
@@ -319,7 +319,7 @@ export default EditProfile;
 //     try {
 //       const token = localStorage.getItem("token");
 //       const response = await axios.put(
-//         "https://damp-depths-11309-368a38513de2.herokuapp.com/api/users/me",
+//         "https://message-in-a-botlle-b79d5a3a128e.herokuapp.com/api/users/me",
 //         { firstName, lastName, mobile: phoneNumber },
 //         { headers: { Authorization: `Bearer ${token}` } }
 //       );

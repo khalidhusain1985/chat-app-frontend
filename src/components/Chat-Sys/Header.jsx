@@ -24,7 +24,7 @@ const Header = ({
       try {
         const token = localStorage.getItem("token");
         const response = await axios.get(
-          "https://damp-depths-11309-368a38513de2.herokuapp.com/api/users/me",
+          "https://message-in-a-botlle-b79d5a3a128e.herokuapp.com/api/users/me",
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -33,7 +33,7 @@ const Header = ({
         setUserData(response.data);
         if (userData.avatar) {
           setAvatarPreview(
-            `https://damp-depths-11309-368a38513de2.herokuapp.com/${userData.avatar}`
+            `https://message-in-a-botlle-b79d5a3a128e.herokuapp.com/${userData.avatar}`
           );
         }
       } catch (error) {
@@ -79,7 +79,7 @@ const Header = ({
             alt="logo"
             style={{ height: "55px", borderRadius: "100%" }}
           />
-          <h1 className="text-xl md:text-2xl font-bold text-gray-800">CHAI</h1>
+          <h1 className="text-xl md:text-2xl font-bold text-gray-800">Message In A Botlle</h1>
           <div className="flex space-x-1">
             {/* <IconButton
               className={
@@ -117,7 +117,7 @@ const Header = ({
             <Avatar
               src={
                 userData && userData.avatar
-                  ? `https://damp-depths-11309-368a38513de2.herokuapp.com/${userData.avatar}`
+                  ? `https://message-in-a-botlle-b79d5a3a128e.herokuapp.com/${userData.avatar}`
                   : "/api/placeholder/32/32"
               }
               alt="Profile"

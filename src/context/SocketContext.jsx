@@ -16,7 +16,7 @@ export const SocketProvider = ({ children }) => {
     const userId = localStorage.getItem("Puser");
     const userName = localStorage.getItem("Puser");
 
-    const newSocket = io("https://chat-app-demo-9e8a.onrender.com");
+    const newSocket = io("https://message-in-a-botlle-b79d5a3a128e.herokuapp.com");
 
     newSocket.on("connect", () => {
       console.log("Socket connected");

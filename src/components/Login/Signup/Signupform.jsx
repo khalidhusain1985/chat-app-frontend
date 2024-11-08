@@ -29,7 +29,7 @@ function SignupForm() {
         return;
       }
       
-      const url = "https://damp-depths-11309-368a38513de2.herokuapp.com/api/users";
+      const url = "https://message-in-a-botlle-b79d5a3a128e.herokuapp.com/api/users";
       const response = await axios.post(url, data);
       console.log(response.data);
       navigate("/login");

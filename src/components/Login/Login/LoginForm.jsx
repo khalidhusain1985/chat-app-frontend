@@ -20,7 +20,7 @@ function LoginForm() {
       return;
     }
     try {
-      const url = "https://damp-depths-11309-368a38513de2.herokuapp.com/api/auth/login";
+      const url = "https://message-in-a-botlle-b79d5a3a128e.herokuapp.com/api/auth/login";
       const { data } = await axios.post(url, { email, password });
       localStorage.setItem("token", data.token);
       localStorage.setItem("Puser", data.user.id);
@@ -107,12 +107,6 @@ function LoginForm() {
           >
             Remember Me
           </label>
-          <a
-            href="/forgotpassword"
-            className="ml-auto text-sm font-medium text-[#FF8682]"
-          >
-            Forgot Password
-          </a>
         </div>
 
         <button
