@@ -6,17 +6,14 @@ import Login from "./components/Login/Login/Login";
 import ChatApp from "./components/Chat-Sys/ChatApp";
 import SetPasswordPage from "./components/Login/SetPasswordPage";
 import VerifyPage from "./components/Login/VerifyCode";
-import SecurityPage from './SecurityPage.jsx';
+
 
 function App() {
-  const user = localStorage.getItem("token");
-  const securityCodeEntered = localStorage.getItem('securityCodeEntered');
 
   return (
     <BrowserRouter>
       <Routes>
         {user && <Route path="/" exact element={<ChatApp />} />}
-        {!securityCodeEntered && <Route path="/" element={<SecurityPage />} />}
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/forgotpassword" element={<Forgot />} />
