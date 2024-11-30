@@ -65,7 +65,7 @@ const IncomingCallDialog = ({ open, caller, onAccept, onReject }) => {
             sx={{ display: "flex", alignItems: "center", gap: 1 }}
           >
             <PhoneIcon fontSize="small" />
-            Audio Call
+            Video Call
           </Typography>
         </Box>
       </DialogContent>

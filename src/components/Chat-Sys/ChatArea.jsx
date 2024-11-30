@@ -20,6 +20,7 @@ import {
 import { DockIcon, FileScan, List } from "lucide-react";
 import { DocumentScanner, LocationOn, LockClock, PunchClock, Share } from "@mui/icons-material";
 import { ListItemIcon, Select } from "@mui/material";
+import { Link, useNavigate } from "react-router-dom";
 
 const SOCKET_URL = "http://api.messageinabotlle.app";
 const ALLOWED_FILE_TYPES = {
@@ -30,6 +31,7 @@ const ALLOWED_FILE_TYPES = {
 };
 
 function ChatArea({ activeUser }) {
+  const navigate = useNavigate();
   const userId = localStorage.getItem("Puser");
   const [message, setMessage] = useState("");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -318,6 +320,10 @@ function ChatArea({ activeUser }) {
       alert("Geolocation is not supported by your browser.");
     }
   };
+  const handleVideoCallClick = () => {
+    // Opens the video call page in a new tab
+    window.open('/videocall', '_blank');
+  };
   
   
   
@@ -474,12 +480,11 @@ function ChatArea({ activeUser }) {
       >
         <AudioCallIcon />
       </button>
-      <button
-        className="p-2 rounded-full"
-        onClick={() => setIsVideoCallOpen(true)}
-      >
-        <VideosIcon />
-      </button>
+      
+      <button className="p-2 rounded-full" onClick={handleVideoCallClick}>
+      <VideosIcon />
+    </button>
+      
       
     </div>
   </div>
@@ -492,6 +497,7 @@ function ChatArea({ activeUser }) {
         key={index}
         className={`flex ${msg.senderId === userId ? "justify-end" : "justify-start"}`}
       >
+        
         <div
           className={`max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl rounded-lg p-3 ${
             msg.senderId === userId ? "bg-[#26A69A] text-white" : "bg-gray-100"
@@ -505,6 +511,7 @@ function ChatArea({ activeUser }) {
       </div>
     ))}
     <div ref={messagesEndRef} />
+    
   </div>
 
   {/* Input Area with File Upload */}
@@ -648,12 +655,7 @@ function ChatArea({ activeUser }) {
     contact={activeUser}
     socket={socket}
   />
-  <VideoComponent
-    open={isVideoCallOpen}
-    onClose={() => setIsVideoCallOpen(false)}
-    contact={activeUser}
-    socket={socket}
-  />
+  
 </div>
 
   );
