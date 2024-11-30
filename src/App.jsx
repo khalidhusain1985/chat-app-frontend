@@ -9,6 +9,7 @@ import VerifyPage from "./components/Login/VerifyCode";
 import EditProfile from "./components/Chat-Sys/EditProfile";
 import { Aifeatures } from "./components/Aifeatures/Aifeatures";
 import VideoCallComponent from "./components/Chat-Sys/ChatComponents/VideoCallComponent";
+import { Aiplan } from "./components/Aifeatures/Aiplan";
 // import { GoogleOAuthProvider } from "@react-oauth/google";
 // import AccountProvider from "./context/AccountProvider";
 
@@ -32,6 +33,7 @@ function App() {
         <Route path="/verify" element={<VerifyPage />} />
         <Route path="/ai-features" element={<Aifeatures/>} />
         <Route path="/videocall" element={<VideoCallComponent/>} />
+        <Route path="/aiplan" element={<Aiplan/>} />
       </Routes>
     </BrowserRouter>
   );

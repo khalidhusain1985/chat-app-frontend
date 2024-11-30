@@ -266,7 +266,7 @@ const EditProfile = () => {
               startIcon={<LogoutIcon />}
               onClick={handleLogout} 
             >
-              Logout
+              Delete my account
             </Button>
           </Box>
         </Box>
