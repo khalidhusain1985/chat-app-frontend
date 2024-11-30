@@ -1,0 +1,10 @@
+{
+  "appId": "com.miab.app",
+  "appName": "Miab",
+  "webDir": "dist",
+  "plugins": {
+    "SplashScreen": {
+      "launchAutoHide": false
+    }
+  }
+}

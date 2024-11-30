@@ -21,27 +21,21 @@ function UpdateNotification({ onDismiss }) {
             />
           </svg>
         </div>
-        <div className="ml-3 w-0 flex-1 pt-0.5">
+        <div className="ml-3 w-[100%] flex-1 pt-0.5">
           <p className="text-sm font-medium text-gray-900">
-            We've just released a new update!
+          Welcome To The Mysterious World 
           </p>
           <p className="mt-1 text-sm text-gray-500">
-            Check out the all-new dashboard view. Pages and exports now load
-            faster.
+          Where You can Connect with Mysterious People around the Globe..
           </p>
           <div className="mt-3 flex space-x-7">
             <button
               onClick={onDismiss}
-              className="text-sm text-gray-700 font-medium hover:text-gray-500"
+              className="text-sm text-[#26A69A] font-medium hover:text-gray-500"
             >
-              Dismiss
+              Let's Start
             </button>
-            <button
-              className="text-sm font-medium hover:text-grey-500"
-              style={{ color: "#26A69A" }}
-            >
-              Check
-            </button>
+            
           </div>
         </div>
         <div className="ml-4 flex-shrink-0 flex">

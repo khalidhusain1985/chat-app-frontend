@@ -4,7 +4,7 @@ import ProfileSidebar from "./ChatComponents/ProfileSidebar";
 import AudioCallComponent from "./ChatComponents/AudioCallComponent";
 import VideoComponent from "./ChatComponents/VideoCallComponent";
 import { io } from "socket.io-client";
-import chatbg from "../../assets/chatbg.jpg";
+import chatbg from "../../assets/chatbg.png";
 import logo from "../../assets/logo.jpg";
 
 import {
@@ -17,8 +17,11 @@ import {
   RecordIcon,
   AudioCallIcon,
 } from "./Icons";
+import { DockIcon, FileScan, List } from "lucide-react";
+import { DocumentScanner, LocationOn, LockClock, PunchClock, Share } from "@mui/icons-material";
+import { ListItemIcon, Select } from "@mui/material";
 
-const SOCKET_URL = "https://message-in-a-botlle-b79d5a3a128e.herokuapp.com";
+const SOCKET_URL = "http://api.messageinabotlle.app";
 const ALLOWED_FILE_TYPES = {
   image: ["image/jpeg", "image/png", "image/gif"],
   video: ["video/mp4", "video/webm"],
@@ -31,6 +34,7 @@ function ChatArea({ activeUser }) {
   const [message, setMessage] = useState("");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [showEmojis, setShowEmojis] = useState(false);
+  const [showLocation,setShowLocation] = useState(false);
   const [muteModalOpen, setMuteModalOpen] = useState(false);
   const [isVideoCallOpen, setIsVideoCallOpen] = useState(false);
   const [isAudioCallOpen, setIsAudioCallOpen] = useState(false);
@@ -110,7 +114,7 @@ function ChatArea({ activeUser }) {
       }
     };
 
-    // fetchChatHistory();
+    fetchChatHistory();
 
     return () => newSocket.close();
   }, [userId]);
@@ -276,9 +280,49 @@ function ChatArea({ activeUser }) {
     if (ALLOWED_FILE_TYPES.audio.includes(mimeType)) return "audio";
     return "document";
   };
+  const sendLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          const locationMessage = `https://www.google.com/maps?q=${latitude},${longitude}`;
+  
+          const messageData = {
+            senderId: userId,
+            receiverId: activeUser._id,
+            message: locationMessage,
+            type: "location",
+          };
+  
+          socket.emit("private-message", messageData);
+  
+          setMessagesByContact((prev) => ({
+            ...prev,
+            [activeUser._id]: [
+              ...(prev[activeUser._id] || []),
+              {
+                senderId: userId,
+                content: locationMessage,
+                timestamp: new Date(),
+                type: "location",
+              },
+            ],
+          }));
+        },
+        (error) => {
+          console.error("Error fetching location:", error);
+          alert("Unable to fetch location. Please check your device settings.");
+        }
+      );
+    } else {
+      alert("Geolocation is not supported by your browser.");
+    }
+  };
+  
+  
+  
 
   const renderMessage = (msg) => {
-    // Check if the content is a file URL by checking the file extension
     const isFileUrl = (url) => {
       const extensions = [
         "jpg",
@@ -294,6 +338,7 @@ function ChatArea({ activeUser }) {
         "ppt",
         "xlsm",
         "wav",
+
       ];
       return extensions.some((ext) => url.toLowerCase().endsWith(ext));
     };
@@ -321,6 +366,24 @@ function ChatArea({ activeUser }) {
               <source src={msg.content} type="audio/webm" />
             </audio>
           );
+          case "location":
+            const locationCoords = msg.content.split('=')[1]; 
+            const [latitude, longitude] = locationCoords.split(',');
+          
+            return (
+              <div className="flex flex-col items-start space-y-2">
+                <div
+                  className="w-[50%] h-48 bg-cover bg-center rounded-md cursor-pointer"
+                  style={{
+                    backgroundImage: `url(https://maps.googleapis.com/maps/api/staticmap?center=${latitude},${longitude}&zoom=15&size=600x300&markers=color:red%7Clabel:S%7C${latitude},${longitude})`,
+                  }}
+                ></div>
+                <div className="text-sm text-gray-500">Location shared</div>
+              </div>
+            );
+          
+
+
         case "document":
           return (
             <a
@@ -329,7 +392,7 @@ function ChatArea({ activeUser }) {
               rel="noopener noreferrer"
               className="text-white-500 hover:underline"
             >
-              Open Document
+              <DocumentScanner/>
             </a>
           );
         default:
@@ -375,10 +438,10 @@ function ChatArea({ activeUser }) {
   if (!activeUser) {
     return (
       <div
-        className="flex-1 flex items-center justify-center bg-cover bg-center"
+        className="flex-1 flex items-center justify-center bg-cover opacity-80 bg-center pt-72"
         style={{ backgroundImage: `url(${chatbg})` }}
       >
-        <p className="text-[#a7e7a7] font-bold text-[40px] text-center">
+        <p className="text-[#26A69A] font-bold text-[25px] text-center ">
           Select a contact to start chatting
         </p>
       </div>
@@ -386,175 +449,214 @@ function ChatArea({ activeUser }) {
   }
 
   return (
-    <div className="flex-1 flex flex-col bg-white">
-    {/* Header */}
-    <div className="bg-white p-4 flex justify-between items-center border-b">
-      <div className="flex items-center">
-        <div className="w-10 h-10 rounded-full mr-3 bg-gray-300 flex items-center justify-center">
-          <img
-            src={`https://message-in-a-botlle-b79d5a3a128e.herokuapp.com/${activeUser.avatar}`}
-            alt={activeUser.firstName}
-            className="w-full h-full rounded-full object-cover"
-          />
-        </div>
-        <div>
-          <h2 className="font-semibold text-green-600 text-sm sm:text-base">
-            {activeUser.firstName} {activeUser.lastName}
-          </h2>
-          <p className="text-xs sm:text-sm text-gray-500">{activeUser.email}</p>
-        </div>
+    <div className="flex-1 flex flex-col bg-white ">
+  {/* Header */}
+  <div className="bg-white p-4 flex justify-between items-center border-b">
+    <div className="flex items-center mx-8 lg:mx-4 md:mx-8">
+      <div className="w-10 h-10 rounded-full mr-3 bg-gray-300 flex items-center justify-center">
+        <img
+          src={`http://api.messageinabotlle.app/${activeUser.avatar}`}
+          alt={activeUser.firstName}
+          className="w-full h-full rounded-full object-cover"
+        />
       </div>
-      <div className="flex space-x-2 sm:space-x-4">
-        <button
-          className="p-1 sm:p-2 rounded-full bg-gray-100 hover:bg-gray-200"
-          onClick={() => setIsAudioCallOpen(true)}
-        >
-          <AudioCallIcon />
-        </button>
-        <button
-          className="p-1 sm:p-2 rounded-full bg-gray-100 hover:bg-gray-200"
-          onClick={() => setIsVideoCallOpen(true)}
-        >
-          <VideosIcon />
-        </button>
-        <button
-          className="p-1 sm:p-2 rounded-full bg-gray-100 hover:bg-gray-200"
-          onClick={() => setIsSidebarOpen(true)}
-        >
-          <SidebarIcon />
-        </button>
+      <div onClick={() => setIsSidebarOpen(true)}  className="cursor-pointer">
+        <h2 className="font-semibold text-green-600 text-sm md:text-base" onClick={() => setIsSidebarOpen(true)}>
+          {activeUser.firstName} {activeUser.lastName}
+        </h2>
+        <p className="text-xs text-gray-500 md:text-sm">{activeUser.mobile}</p>
       </div>
     </div>
-  
-    {/* Messages Area */}
-    <div
-      className="flex-1 overflow-y-auto p-2 space-y-2 sm:space-y-3"
-      style={{
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-      }}
-    >
-      {(messagesByContact[activeUser._id] || []).map((msg, index) => (
+    <div className="flex space-x-2 md:space-x-4">
+      <button
+        className="p-2 rounded-full"
+        onClick={() => setIsAudioCallOpen(true)}
+      >
+        <AudioCallIcon />
+      </button>
+      <button
+        className="p-2 rounded-full"
+        onClick={() => setIsVideoCallOpen(true)}
+      >
+        <VideosIcon />
+      </button>
+      
+    </div>
+  </div>
+
+  {/* Messages Area */}
+  <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-cover bg-center"
+    style={{ backgroundImage: `url(${chatbg})` }}>
+    {(messagesByContact[activeUser._id] || []).map((msg, index) => (
+      <div
+        key={index}
+        className={`flex ${msg.senderId === userId ? "justify-end" : "justify-start"}`}
+      >
         <div
-          key={index}
-          className={`flex ${
-            msg.senderId === userId ? "justify-end" : "justify-start"
+          className={`max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl rounded-lg p-3 ${
+            msg.senderId === userId ? "bg-[#26A69A] text-white" : "bg-gray-100"
           }`}
         >
-          <div
-            className={`max-w-[85%] sm:max-w-[70%] lg:max-w-[60%] xl:max-w-[50%] rounded-lg p-2 ${
-              msg.senderId === userId ? "bg-[#26A69A] text-white" : "bg-gray-100"
-            }`}
-          >
-            {renderMessage(msg)}
-            <div className="text-xs text-gray-500 mt-1">
-              {new Date(msg.timestamp).toLocaleTimeString()}
-            </div>
+          {renderMessage(msg)}
+          <div className="text-xs text-white mt-1">
+            {new Date(msg.timestamp).toLocaleTimeString()}
           </div>
         </div>
-      ))}
-      <div ref={messagesEndRef} />
-    </div>
+      </div>
+    ))}
+    <div ref={messagesEndRef} />
+  </div>
+
+  {/* Input Area with File Upload */}
+  <div className="border-t p-4">
+    <div className="flex items-center space-x-1 w-full">
+    
+    
+      <div className="flex flex-col">
   
-    {/* Input Area with File Upload */}
-    <div className="border-t p-2 sm:p-3">
-      <div className="flex flex-wrap sm:flex-nowrap items-center space-x-1 sm:space-x-2">
-        <button
-          className="p-1 sm:p-2 rounded-full bg-gray-100 hover:bg-gray-200"
-          onClick={() => setShowEmojis(!showEmojis)}
-        >
-          <EmojiIcon />
-        </button>
-        {showEmojis && (
-          <div className="absolute bottom-16 left-0 z-10">
-            <EmojiPicker
-              onEmojiClick={(emojiObject) =>
-                setMessage((prev) => prev + emojiObject.emoji)
-              }
-            />
-          </div>
-        )}
-        <input
-          type="file"
-          ref={fileInputRef}
-          onChange={handleFileUpload}
-          className="hidden"
-        />
-        <button
-          onClick={() => fileInputRef.current.click()}
-          className="p-1 sm:p-2 bg-gray-100 rounded-full hover:bg-gray-200"
-        >
-          <AddIcon />
-        </button>
-  
-        {isUploading && (
-          <div className="h-1 w-12 sm:w-16 bg-gray-200 rounded">
-            <div
-              className="h-full bg-[#26A69A] rounded"
-              style={{ width: `${uploadProgress}%` }}
-            />
-          </div>
-        )}
-  
-        <input
-          type="text"
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          onKeyPress={(e) => e.key === "Enter" && !e.shiftKey && handleSend()}
-          placeholder="Type a message"
-          className="flex-1 w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg border rounded-full py-1 px-2 sm:py-1.5 sm:px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#26A69A]"
-        />
-  
-        {audioPreview ? (
-          <div className="flex items-center space-x-1">
-            <audio src={audioPreview} controls className="h-8 w-20 sm:w-24" />
-            <button
-              className="p-1 sm:p-2 rounded-full bg-gray-500 hover:bg-[#26A69A] text-white"
-              onClick={handleSend}
-            >
-              <SearchIcon />
-            </button>
-            <button
-              onClick={cancelRecordedAudio}
-              className="p-1 sm:p-2 rounded-full bg-red-500 hover:bg-red-600 text-white"
-            >
-              ✕
-            </button>
-          </div>
-        ) : (
+      <button
+        className="p-2 rounded-full  hover:bg-gray-200"
+        onClick={() => setShowEmojis(!showEmojis)}
+      >
+        <EmojiIcon />
+      </button>
+      
+      </div>
+
+      {showEmojis && (
+        <div className="absolute bottom-16 left-0 w-full sm:w-auto">
+          <EmojiPicker
+            onEmojiClick={(emojiObject) =>
+              setMessage((prev) => prev + emojiObject.emoji)
+            }
+          />
+        </div>
+      )}
+
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileUpload}
+        className="hidden"
+      />
+      <div className="flex">
+
+      <button
+        onClick={() => fileInputRef.current.click()}
+        className="p-2  rounded-full hover:bg-gray-200"
+      >
+        <AddIcon />
+        
+      </button>
+      <button
+  className="p-2 rounded-full text-gray-700 hover:bg-gray-200"
+  onClick={sendLocation}
+>
+  <LocationOn />
+</button>
+
+      </div>
+      {showLocation && (
+        <div className="absolute bottom-16 left-0 w-full sm:w-auto">
+          
+        </div>
+      )}
+      
+
+      {isUploading && (
+        <div className="h-1 w-20 sm:w-24 md:w-32 bg-gray-200 rounded">
+          <div
+            className="h-full bg-[#26A69A] rounded"
+            style={{ width: `${uploadProgress}%` }}
+          />
+        </div>
+      )}
+
+      <input
+        type="text"
+        value={message}
+        onChange={(e) => setMessage(e.target.value)}
+        onKeyPress={(e) => e.key === "Enter" && !e.shiftKey && handleSend()}
+        placeholder="Write an note and put it in Botlle"
+        className="flex-1 border rounded-full w-[10%] py-2 px-4 sm:px-3 md:px-4 focus:outline-none focus:ring-2 focus:ring-[#26A69A]"
+      >
+        </input>
+
+      <button
+        onClick={isRecording ? stopRecording : startRecording}
+        className={`p-2 rounded-full ${
+          isRecording
+            ? "bg-red-500 animate-pulse"
+            : "bg-gray-100 hover:bg-[#26A69A]"
+        }`}
+      >
+        <RecordIcon />
+      </button>
+
+      {isUploading && (
+        <div className="h-1 w-20 sm:w-24 md:w-32 bg-gray-200 rounded">
+          <div
+            className="h-full bg-[#26A69A] rounded"
+            style={{ width: `${uploadProgress}%` }}
+          />
+        </div>
+      )}
+
+      {audioPreview ? (
+        <div className="flex items-center space-x-2">
+          <audio
+            src={audioPreview}
+            controls
+            className="h-8 w-32 sm:w-24 md:w-32"
+          />
           <button
-            className="p-1 sm:p-2 rounded-full bg-gray-500 hover:bg-[#26A69A] text-white"
+            className="p-2 rounded-full bg-gray-500 hover:bg-[#26A69A] text-white"
             onClick={handleSend}
           >
             <SearchIcon />
           </button>
-        )}
-      </div>
+          <button
+            onClick={cancelRecordedAudio}
+            className="p-2 rounded-full bg-red-500 hover:bg-red-600 text-white"
+          >
+            ✕
+          </button>
+        </div>
+      ) : (
+        <button
+          className="p-2 rounded-full  hover:bg-[#26A69A] text-white"
+          onClick={handleSend}
+        >
+          <SearchIcon  className="size-1" />
+        </button>
+      )}
     </div>
-  
-    <ProfileSidebar
-      open={isSidebarOpen}
-      onClose={() => setIsSidebarOpen(false)}
-      contact={activeUser}
-      muteModalOpen={muteModalOpen}
-      onMuteClick={() => setMuteModalOpen(true)}
-      onMuteClose={() => setMuteModalOpen(false)}
-      onMute={(duration) => console.log(`Muted for ${duration} minutes`)}
-    />
-    <AudioCallComponent
-      open={isAudioCallOpen}
-      onClose={() => setIsAudioCallOpen(false)}
-      contact={activeUser}
-      socket={socket}
-    />
-    <VideoComponent
-      open={isVideoCallOpen}
-      onClose={() => setIsVideoCallOpen(false)}
-      contact={activeUser}
-      socket={socket}
-    />
   </div>
-    );
+
+  <ProfileSidebar
+    open={isSidebarOpen}
+    onClose={() => setIsSidebarOpen(false)}
+    contact={activeUser}
+    muteModalOpen={muteModalOpen}
+    onMuteClick={() => setMuteModalOpen(true)}
+    onMuteClose={() => setMuteModalOpen(false)}
+    onMute={(duration) => console.log(`Muted for ${duration} minutes`)}
+  />
+  <AudioCallComponent
+    open={isAudioCallOpen}
+    onClose={() => setIsAudioCallOpen(false)}
+    contact={activeUser}
+    socket={socket}
+  />
+  <VideoComponent
+    open={isVideoCallOpen}
+    onClose={() => setIsVideoCallOpen(false)}
+    contact={activeUser}
+    socket={socket}
+  />
+</div>
+
+  );
 }
 
 export default ChatArea;

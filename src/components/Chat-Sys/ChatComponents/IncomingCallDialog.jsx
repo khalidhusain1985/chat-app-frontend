@@ -28,7 +28,7 @@ const IncomingCallDialog = ({ open, caller, onAccept, onReject }) => {
       }}
     >
       <DialogTitle sx={{ textAlign: "center", pt: 3 }}>
-        <Typography variant="h6" sx={{ color: "#26A69A" }}>
+        <Typography variant="h6" sx={{ color: "#000" }}>
           Incoming Call
         </Typography>
       </DialogTitle>

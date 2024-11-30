@@ -71,7 +71,7 @@ const ProfileSidebar = ({
             >
               <Avatar
                 src={
-                  `https://message-in-a-botlle-b79d5a3a128e.herokuapp.com/${contact.avatar}` ||
+                  `https://api.messageinabotlle.app/${contact.avatar}` ||
                   "/api/placeholder/100/100"
                 }
                 alt={contact?.firstName || "Contact"}
@@ -140,6 +140,7 @@ const ProfileSidebar = ({
                   secondary={contact?.email || "konstantin@example.com"}
                 />
               </ListItem>
+              
             </List>
           </Box>
         );

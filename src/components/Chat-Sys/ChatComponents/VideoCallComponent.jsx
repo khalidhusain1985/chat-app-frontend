@@ -8,7 +8,7 @@ import {
   Videocam as VideocamIcon,
   VideocamOff as VideocamOffIcon,
 } from "@mui/icons-material";
-import IncomingCallDialog from "./IncomingCallDialog"; 
+import IncomingCallDialog from "./IncomingCallDialog";
 
 const VideoCallComponent = ({ open, onClose, contact, socket }) => {
   const userId = localStorage.getItem("Puser");
@@ -30,6 +30,31 @@ const VideoCallComponent = ({ open, onClose, contact, socket }) => {
     iceServers: [{ urls: ["stun:stun1.l.google.com:19302"] }],
   };
 
+  const initializePeerConnection = () => {
+    if (peerConnection.current && peerConnection.current.signalingState !== "closed") {
+      peerConnection.current.close();
+    }
+    peerConnection.current = new RTCPeerConnection(servers);
+  
+    peerConnection.current.onicecandidate = (event) => {
+      if (event.candidate) {
+        socket.emit("iceCandidate", {
+          to: contact._id,
+          candidate: event.candidate,
+        });
+      }
+    };
+  
+    peerConnection.current.ontrack = (event) => {
+      if (remoteVideoRef.current) {
+        setRemoteStream(event.streams[0]);
+        remoteVideoRef.current.srcObject = event.streams[0];
+      }
+    };
+  };
+  
+  
+
   useEffect(() => {
     if (!socket) return;
 
@@ -37,63 +62,37 @@ const VideoCallComponent = ({ open, onClose, contact, socket }) => {
       setIsReceivingCall(true);
       setIncomingSignal(signal);
       initializePeerConnection();
-      peerConnection.current = new RTCPeerConnection(servers);
-
-      //  parsed signal with RTCSessionDescriptioninit structure
-      // const remoteDesc = new RTCSessionDescription({
-      //   type: signal.type,
-      //   sdp: signal.sdp,
-      // });
-      // console.log("remoteDesc on useEffect", remoteDesc);
-
-      // peerConnection.current
-      //   .setRemoteDescription(remoteDesc)
-      //   .then(() => console.log("Remote description set successfully"))
-      //   .catch((err) =>
-      //     console.error("Error setting remote description:", err)
-      //   );
-
-      peerConnection.current.ontrack = (event) => {
-        console.log("getting video track remotely ", event);
-        if (remoteVideoRef.current) {
-          setRemoteStream(event.streams[0]);
-          console.log("Remote stream set successfully:", event.streams[0]);
-          console.log("remote Stream ", remoteStream);
-
-          remoteVideoRef.current.srcObject = event.streams[0];
-        }
-      };
-
-      peerConnection.current.onicecandidate = (event) => {
-        if (event.candidate) {
-          socket.emit("iceCandidate", { to: from, candidate: event.candidate });
-        }
-      };
     });
 
     socket.on("callAccepted", async (signal) => {
-      if (peerConnection.current) {
-        try {
-          console.log("Signal inside callAccepted", signal);
+      try {
+        console.log("Signal received in callAccepted:", signal);
+        console.log("Sigal ",peerConnection.current)
+        if (peerConnection.current?.signalingState === "have-local-offer") {
           const answerDesc = new RTCSessionDescription(signal);
           await peerConnection.current.setRemoteDescription(answerDesc);
           setCallAccepted(true);
-          console.log("Answer SDP set successfully");
-        } catch (error) {
-          console.error("Failed to set remote description:", error);
+          console.log("Remote description set successfully");
+        } else {
+          console.error(
+            "Invalid signaling state for setting remote description:",
+            peerConnection.current?.signalingState
+          );
         }
-      } else {
-        console.error("peerConnection.current is undefined in callAccepted");
+      } catch (error) {
+        console.error("Failed to set remote description:", error);
       }
     });
 
-    // socket.on("iceCandidate", async ({ candidate }) => {
-    //   if (peerConnection.current && candidate) {
-    //     await peerConnection.current.addIceCandidate(
-    //       new RTCIceCandidate(candidate)
-    //     );
-    //   }
-    // });
+    socket.on("iceCandidate", async ({ candidate }) => {
+      try {
+        if (peerConnection.current && candidate) {
+          await peerConnection.current.addIceCandidate(new RTCIceCandidate(candidate));
+        }
+      } catch (error) {
+        console.error("Error adding ICE candidate:", error);
+      }
+    });
 
     return () => {
       socket.off("callUser");
@@ -102,135 +101,129 @@ const VideoCallComponent = ({ open, onClose, contact, socket }) => {
     };
   }, [socket]);
 
-  const initializePeerConnection = () => {
-    peerConnection.current = new RTCPeerConnection(servers);
-
-    peerConnection.current.onicecandidate = (event) => {
-      console.log("iceCandidate ", event.Candidate);
-
-      if (event.candidate) {
-        socket.emit("iceCandidate", {
-          to: contact._id,
-          candidate: event.candidate,
-        });
-      }
-    };
-  };
-
-  // const startCall = async () => {
-  //   const stream = await navigator.mediaDevices.getUserMedia({
-  //     video: true,
-  //     audio: true,
-  //   });
-  //   setLocalStream(stream);
-  //   localVideoRef.current.srcObject = stream;
-
-  //   const peer = new RTCPeerConnection(servers);
-  //   peerConnection.current = peer;
-  //   stream.getTracks().forEach((track) => peer.addTrack(track, stream));
-
-  //   peer.onicecandidate = (event) => {
-  //     if (event.candidate) {
-  //       socket.emit("iceCandidate", {
-  //         to: contact._id,
-  //         candidate: event.candidate,
-  //       });
-  //     }
-  //   };
-
-  //   peer.ontrack = (event) => {
-  //     setRemoteStream(event.streams[0]);
-  //     remoteVideoRef.current.srcObject = event.streams[0];
-  //   };
-
-  //   const offer = await peer.createOffer();
-  //   await peer.setLocalDescription(offer);
-
-  //   // Emit signal with correct structure
-  //   socket.emit("callUser", {
-  //     userToCall: contact._id,
-  //     from: userId,
-  //     signalData: { type: offer.type, sdp: offer.sdp },
-  //   });
-  //   setIsCalling(true);
-  // };
   const startCall = async () => {
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: true,
-      audio: true,
-    });
-    setLocalStream(stream);
-    localVideoRef.current.srcObject = stream;
-    initializePeerConnection();
-    console.log("add local stream to peer connection", localStream);
-
-    stream
-      .getTracks()
-      .forEach((track) => peerConnection.current.addTrack(track, stream));
-
-    const offer = await peerConnection.current.createOffer();
-    console.log("offer", offer);
-
-    await peerConnection.current.setLocalDescription(offer);
-    socket.emit("callUser", {
-      userToCall: contact._id,
-      from: userId,
-      signalData: offer,
-    });
-    setIsCalling(true);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: true,
+      });
+  
+      // Clean up any previous connection and reinitialize
+      if (peerConnection.current) {
+        peerConnection.current.close();
+        peerConnection.current = null;
+      }
+  
+      initializePeerConnection(); // Ensure a new RTCPeerConnection is created
+  
+      setLocalStream(stream);
+      localVideoRef.current.srcObject = stream;
+      stream.getTracks().forEach((track) => {
+        if (peerConnection.current.signalingState !== "closed") {
+          peerConnection.current.addTrack(track, stream);
+        } else {
+          throw new Error("PeerConnection is closed");
+        }
+      });
+  
+      const offer = await peerConnection.current.createOffer();
+      await peerConnection.current.setLocalDescription(offer);
+  
+      console.log(
+        "Signaling state after setting local description:",
+        peerConnection.current.signalingState
+      );
+  
+      socket.emit("callUser", {
+        userToCall: contact._id,
+        from: userId,
+        signalData: offer,
+      });
+  
+      setIsCalling(true);
+    } catch (error) {
+      console.error("Error starting call:", error);
+    }
   };
+  
+  
 
   const answerCall = async () => {
-    if (!incomingSignal) return;
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: true,
-      audio: true,
-    });
-    setLocalStream(stream);
-    localVideoRef.current.srcObject = stream;
-    initializePeerConnection();
-
-    stream
-      .getTracks()
-      .forEach((track) => peerConnection.current.addTrack(track, stream));
-
-    const remoteDesc = new RTCSessionDescription(incomingSignal);
-    console.log("remote description", remoteDesc);
-    await peerConnection.current.setRemoteDescription(remoteDesc);
-
-    const answer = await peerConnection.current.createAnswer();
-    await peerConnection.current.setLocalDescription(answer);
-    socket.emit("answerCall", { to: contact._id, signal: answer });
-    setCallAccepted(true);
-    setIsReceivingCall(false);
+    try {
+      if (!incomingSignal) {
+        console.error("No incoming signal to answer.");
+        return;
+      }
+  
+      console.log("Incoming signal:", incomingSignal);
+  
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: true,
+      });
+      setLocalStream(stream);
+      localVideoRef.current.srcObject = stream;
+  
+      initializePeerConnection();
+      console.log("connection ",peerConnection.current)
+      stream.getTracks().forEach((track) => {
+        peerConnection.current.addTrack(track, stream);
+      });
+  
+      console.log("Setting remote description...");
+      const remoteDesc = new RTCSessionDescription(incomingSignal);
+      await peerConnection.current.setRemoteDescription(remoteDesc);
+      console.log("Remote description set.");
+  
+      const answer = await peerConnection.current.createAnswer();
+      await peerConnection.current.setLocalDescription(answer);
+      console.log("Local answer set:", answer);
+  
+      socket.emit("answerCall", { to: contact._id, signal: answer });
+      console.log("Answer sent to:", contact._id);
+  
+      setCallAccepted(true);
+      setIsReceivingCall(false);
+    } catch (error) {
+      console.error("Error answering call:", error);
+    }
   };
+  
+  
 
   const endCall = () => {
-    if (localStream) localStream.getTracks().forEach((track) => track.stop());
-    if (peerConnection.current) peerConnection.current.close();
-
-    setLocalStream(null);
+    if (localStream) {
+      localStream.getTracks().forEach((track) => track.stop());
+      setLocalStream(null);
+    }
+  
+    if (peerConnection.current) {
+      peerConnection.current.ontrack = null;
+      peerConnection.current.onicecandidate = null;
+      peerConnection.current.close();
+      peerConnection.current = null;
+    }
+  
     setRemoteStream(null);
     setIsCalling(false);
     setCallAccepted(false);
     setIsReceivingCall(false);
+  
     onClose();
     socket.emit("endCall", { to: contact._id });
   };
+  
+
   const toggleMute = () => {
     if (localStream) {
-      localStream
-        .getAudioTracks()
-        .forEach((track) => (track.enabled = !track.enabled));
+      localStream.getAudioTracks().forEach((track) => (track.enabled = !track.enabled));
       setIsMuted(!isMuted);
     }
   };
 
   const toggleVideo = () => {
     if (localStream) {
-      localStream
-        .getVideoTracks()
-        .forEach((track) => (track.enabled = !track.enabled));
+      localStream.getVideoTracks().forEach((track) => (track.enabled = !track.enabled));
       setIsVideoOff(!isVideoOff);
     }
   };
@@ -277,17 +270,11 @@ const VideoCallComponent = ({ open, onClose, contact, socket }) => {
           >
             {isVideoOff ? <VideocamOffIcon /> : <VideocamIcon />}
           </IconButton>
-          <IconButton
-            onClick={endCall}
-            sx={{ bgcolor: "#ef5350", color: "white" }}
-          >
+          <IconButton onClick={endCall} sx={{ bgcolor: "#ef5350", color: "white" }}>
             <CallEndIcon />
           </IconButton>
           {!isCalling && !callAccepted && (
-            <IconButton
-              onClick={startCall}
-              sx={{ bgcolor: "#26A69A", color: "white" }}
-            >
+            <IconButton onClick={startCall} sx={{ bgcolor: "#26A69A", color: "white" }}>
               <CallEndIcon />
             </IconButton>
           )}

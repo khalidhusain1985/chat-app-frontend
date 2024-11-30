@@ -1,8 +1,8 @@
-export const host = "https://message-in-a-botlle-b79d5a3a128e.herokuapp.com";
-// const url = "https://message-in-a-botlle-b79d5a3a128e.herokuapp.com/api/auth/login";
+export const host = "https://api.messageinabotlle.app";
+// const url = "https://api.messageinabotlle.app/api/auth/login";
 export const loginRoute = `${host}/api/auth/login`;
 
-// const url = "https://message-in-a-botlle-b79d5a3a128e.herokuapp.com/api/users";
+// const url = "https://api.messageinabotlle.app/api/users";
 export const registerRoute = `${host}/api/users`;
 export const logoutRoute = `${host}/api/auth/logout`;
 export const allUsersRoute = `${host}/api/auth/allusers`;

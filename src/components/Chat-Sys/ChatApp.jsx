@@ -31,7 +31,7 @@ function ChatApp() {
   const fetchUsers = async () => {
     try {
       const response = await axios.get(
-        "https://message-in-a-botlle-b79d5a3a128e.herokuapp.com/users"
+        "https://api.messageinabotlle.app/users"
       );
       setUsers(response.data);
     } catch (error) {
@@ -159,7 +159,7 @@ export default ChatApp;
 //     navigate("/login");
 //   };
 //   // const fetch = async () => {
-//   //   const url = "https://message-in-a-botlle-b79d5a3a128e.herokuapp.com/users";
+//   //   const url = "https://api.messageinabotlle.app/users";
 //   //   const response = await axios.get(url);
 //   //   console.log("userData", response.data);
 //   //   setUserData([...userData, response.data]);

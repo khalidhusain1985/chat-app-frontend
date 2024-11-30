@@ -8,17 +8,20 @@ function Forgotform() {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    
+    // Basic form validation
     if (!email) {
       setError("Please enter your email address");
       return;
     }
 
+    // Reset error on successful input
     setError("");
 
+    // Simulate password reset logic (API call, etc.)
     console.log("Password reset link sent to:", email);
     setSuccessMessage("A password reset link has been sent to your email.");
 
+    // Clear the form field after submission
     setEmail("");
   };
 

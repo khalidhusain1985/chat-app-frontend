@@ -10,10 +10,10 @@ import {
   Avatar,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-
+import LogoutIcon from "@mui/icons-material/Logout";
 import { PhotoIcon } from "./Icons";
-
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const StyledTextField = styled(TextField)({
   "& .MuiOutlinedInput-root": {
@@ -24,6 +24,7 @@ const StyledTextField = styled(TextField)({
 const StyledSelect = styled(Select)({
   borderRadius: "8px",
 });
+
 const ImageUploadButton = styled(Button)({
   position: "absolute",
   bottom: 0,
@@ -58,7 +59,8 @@ const AvatarImage = styled("img")({
   objectFit: "cover",
 });
 
-const EditProfile = ({ onClose }) => {
+const EditProfile = () => {
+  const navigate = useNavigate(); 
   const userId = localStorage.getItem("Puser");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -72,21 +74,16 @@ const EditProfile = ({ onClose }) => {
     const fetchUserData = async () => {
       try {
         const token = localStorage.getItem("token");
-        const response = await axios.get(
-          "https://message-in-a-botlle-b79d5a3a128e.herokuapp.com/api/users/me",
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
+        const response = await axios.get("https://api.messageinabotlle.app/api/users/me", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         const userData = response.data;
         setFirstName(userData.firstName);
         setLastName(userData.lastName);
         setEmail(userData.email);
         setPhoneNumber(userData.mobile);
         if (userData.avatar) {
-          setAvatarPreview(
-            `https://message-in-a-botlle-b79d5a3a128e.herokuapp.com/${userData.avatar}`
-          );
+          setAvatarPreview(`https://api.messageinabotlle.app/${userData.avatar}`);
         }
       } catch (error) {
         console.error("Error fetching user data:", error);
@@ -101,10 +98,10 @@ const EditProfile = ({ onClose }) => {
     if (file) {
       setAvatarFile(file);
       setAvatarPreview(URL.createObjectURL(file));
-      console.log(file);
     }
   };
 
+  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -127,7 +124,7 @@ const EditProfile = ({ onClose }) => {
       }
 
       const response = await axios.put(
-        "https://message-in-a-botlle-b79d5a3a128e.herokuapp.com/api/users/me",
+        "https://api.messageinabotlle.app/api/users/me",
         formData,
         {
           headers: {
@@ -138,17 +135,18 @@ const EditProfile = ({ onClose }) => {
       );
       alert("Profile updated successfully!");
     } catch (error) {
-      if (error.response) {
-        console.error("Server responded with:", error.response.data);
-        alert(`Error updating profile: ${error.response.data.message}`);
-      } else if (error.request) {
-        console.error("No response received:", error.request);
-        alert("No response from server. Please try again.");
-      } else {
-        console.error("Error setting up request:", error.message);
-        alert(`Error: ${error.message}`);
-      }
+      console.error("Error updating profile:", error);
     }
+  };
+
+  const handleBackClick = () => {
+    navigate("/app"); 
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");  
+    localStorage.removeItem("Puser");  
+    navigate("/login");  
   };
 
   return (
@@ -156,7 +154,7 @@ const EditProfile = ({ onClose }) => {
       <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
         <Button
           startIcon={<ArrowBackIcon />}
-          onClick={onClose}
+          onClick={handleBackClick}
           sx={{ color: "#00796B", fontWeight: "bold" }}
         >
           Edit Profile
@@ -240,19 +238,37 @@ const EditProfile = ({ onClose }) => {
               <MenuItem value="UK">UK</MenuItem>
             </StyledSelect>
           </Box>
-          <Button
-            variant="contained"
-            type="submit"
-            sx={{
-              mt: 2,
-              bgcolor: "#00796B",
-              "&:hover": {
-                bgcolor: "#00695C",
-              },
-            }}
-          >
-            Save Changes
-          </Button>
+          <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+            <Button
+              variant="contained"
+              type="submit"
+              sx={{
+                mt: 2,
+                bgcolor: "#00796B",
+                "&:hover": {
+                  bgcolor: "#00695C",
+                },
+              }}
+            >
+              Save Changes
+            </Button>
+            <Button
+              variant="outlined"
+              sx={{
+                mt: 2,
+                color: "#d32f2f",
+                borderColor: "#d32f2f",
+                "&:hover": {
+                  borderColor: "#b71c1c",
+                  backgroundColor: "#f5f5f5",
+                },
+              }}
+              startIcon={<LogoutIcon />}
+              onClick={handleLogout} 
+            >
+              Logout
+            </Button>
+          </Box>
         </Box>
       </form>
     </Box>
@@ -260,6 +276,7 @@ const EditProfile = ({ onClose }) => {
 };
 
 export default EditProfile;
+
 
 // import { useState, useEffect } from "react";
 // import {
@@ -297,7 +314,7 @@ export default EditProfile;
 //     const fetchUserData = async () => {
 //       try {
 //         const token = localStorage.getItem("token");
-//         const response = await axios.get("https://message-in-a-botlle-b79d5a3a128e.herokuapp.com/api/users/me", {
+//         const response = await axios.get("https://api.messageinabotlle.app/api/users/me", {
 //           headers: { Authorization: `Bearer ${token}` },
 //         });
 //         const userData = response.data;
@@ -319,7 +336,7 @@ export default EditProfile;
 //     try {
 //       const token = localStorage.getItem("token");
 //       const response = await axios.put(
-//         "https://message-in-a-botlle-b79d5a3a128e.herokuapp.com/api/users/me",
+//         "https://api.messageinabotlle.app/api/users/me",
 //         { firstName, lastName, mobile: phoneNumber },
 //         { headers: { Authorization: `Bearer ${token}` } }
 //       );

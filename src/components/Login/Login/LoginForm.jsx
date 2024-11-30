@@ -20,7 +20,7 @@ function LoginForm() {
       return;
     }
     try {
-      const url = "https://message-in-a-botlle-b79d5a3a128e.herokuapp.com/api/auth/login";
+      const url = "https://api.messageinabotlle.app/api/auth/login";
       const { data } = await axios.post(url, { email, password });
       localStorage.setItem("token", data.token);
       localStorage.setItem("Puser", data.user.id);

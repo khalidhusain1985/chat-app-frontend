@@ -28,8 +28,8 @@ function SignupForm() {
         setError("Passwords do not match");
         return;
       }
-      
-      const url = "https://message-in-a-botlle-b79d5a3a128e.herokuapp.com/api/users";
+      // const url = "https://api.messageinabotlle.app/api/users";
+      const url = "https://api.messageinabotlle.app/api/users";
       const response = await axios.post(url, data);
       console.log(response.data);
       navigate("/login");
@@ -185,7 +185,7 @@ function SignupForm() {
             I agree to all the Terms and Privacy Policies
           </label>
         </div>
-        
+        {/* {error && <div className="text-red-300 ">{error}</div>} */}
 
         <button
           type="submit"
@@ -197,7 +197,7 @@ function SignupForm() {
           Already have an account?{" "}
           <button
             type="button"
-            onClick={() => navigate("/")} 
+            onClick={() => navigate("/")}
             className="text-[#FF8682]"
           >
             Log In

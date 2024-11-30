@@ -297,7 +297,7 @@ const AudioCall = ({ open, onClose, contact, socket }) => {
       <Box display="flex" flexDirection="column" alignItems="center">
         {/* Contact Information */}
         <Avatar
-          src={`https://message-in-a-botlle-b79d5a3a128e.herokuapp.com/${contact.avatar}`}
+          src={`https://api.messageinabotlle.app/${contact.avatar}`}
           alt={contact.firstName}
           sx={{ width: 80, height: 80, mb: 2 }}
         />
